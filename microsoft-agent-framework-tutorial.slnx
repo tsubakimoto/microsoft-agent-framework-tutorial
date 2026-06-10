@@ -1,2 +1,5 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MafConsoleApp/MafConsoleApp.csproj" Id="228344e3-e8ba-445f-9b03-77e7b567dfd7" />
+  </Folder>
 </Solution>
