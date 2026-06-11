@@ -5,6 +5,7 @@ using Azure.AI.Projects;
 using Azure.Identity;
 
 using Microsoft.Agents.AI;
+using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.VectorData;
@@ -108,10 +109,51 @@ Console.WriteLine();
 
 #endregion
 
+#region Workflows
+
+// https://learn.microsoft.com/ja-jp/agent-framework/get-started/workflows
+Console.WriteLine("*** Workflows ***");
+
+// Step 1: Convert text to uppercase
+Func<string, string> uppercaseFunc = s => s.ToUpperInvariant();
+var uppercase = uppercaseFunc.BindAsExecutor("UppercaseExecutor");
+
+// Step 2: Reverse the string and yield output
+ReverseTextExecutor reverse = new();
+
+// Step3: Build the workflow
+WorkflowBuilder builder = new(uppercase);
+builder.AddEdge(uppercase, reverse).WithOutputFrom(reverse);
+var workflow = builder.Build();
+
+await using Run run = await InProcessExecution.RunAsync(workflow, "Hello, World!");
+foreach (WorkflowEvent evt in run.NewEvents)
+{
+    if (evt is ExecutorCompletedEvent executorComplete)
+    {
+        Console.WriteLine($"{executorComplete.ExecutorId}: {executorComplete.Data}");
+    }
+}
+Console.WriteLine();
+
+#endregion
+
 #region Tools
 
 [Description("Get the weather for a given location.")]
 static string GetWeather([Description("The location to get the weather for.")] string location)
     => $"The weather in {location} is cloudy with a high of 15°C.";
+
+#endregion
+
+#region Workflows
+
+class ReverseTextExecutor() : Executor<string, string>("ReverseTextExecutor")
+{
+    public override ValueTask<string> HandleAsync(string message, IWorkflowContext context, CancellationToken cancellationToken = default)
+    {
+        return ValueTask.FromResult(string.Concat(message.Reverse()));
+    }
+}
 
 #endregion
