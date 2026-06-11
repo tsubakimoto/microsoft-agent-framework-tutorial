@@ -1,11 +1,14 @@
 ﻿using System.ComponentModel;
 
+using Azure.AI.OpenAI;
 using Azure.AI.Projects;
 using Azure.Identity;
 
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.VectorData;
+using Microsoft.SemanticKernel.Connectors.InMemory;
 
 var configuration = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
@@ -60,6 +63,48 @@ AIAgent agent3 = aiProjectClient
 AgentSession session3 = await agent3.CreateSessionAsync();
 Console.WriteLine(await agent3.RunAsync("My name is Alice and I love hiking.", session3));
 Console.WriteLine(await agent3.RunAsync("What do you remember about me?", session3));
+Console.WriteLine();
+
+#endregion
+
+#region Memory
+
+// https://learn.microsoft.com/ja-jp/agent-framework/get-started/memory
+// https://learn.microsoft.com/en-us/agent-framework/integrations/chat-history-memory-provider
+Console.WriteLine("*** Memory ***");
+VectorStore vectorStore = new InMemoryVectorStore(new InMemoryVectorStoreOptions()
+{
+    EmbeddingGenerator = new AzureOpenAIClient(new Uri(endpoint), new DefaultAzureCredential())
+        .GetEmbeddingClient("text-embedding-3-large")
+        .AsIEmbeddingGenerator()
+});
+AIAgent agent4 = aiProjectClient
+    .AsAIAgent(options: new ChatClientAgentOptions
+    {
+        Name = "MemoryAgent",
+        ChatOptions = new ChatOptions
+        {
+            ModelId = deploymentName,
+            Instructions = "You are a helpful assistant.",
+        },
+        AIContextProviders = [new ChatHistoryMemoryProvider(
+            vectorStore,
+            collectionName: "ChatHistory",
+            vectorDimensions: 3072,
+            session => new ChatHistoryMemoryProvider.State(
+                storageScope: new() { UserId = "user-123", SessionId = Guid.NewGuid().ToString() },
+                searchScope: new() { UserId = "user-123" }))]
+    });
+
+// Start a session and interact with the agent
+AgentSession session4_1 = await agent4.CreateSessionAsync();
+Console.WriteLine(await agent4.RunAsync("I prefer window seats on flights.", session4_1));
+
+// Start a new session - the agent can recall the user's preference
+AgentSession session4_2 = await agent4.CreateSessionAsync();
+Console.WriteLine(await agent4.RunAsync("Book me a flight to Seattle.", session4_2));
+
+Console.WriteLine();
 
 #endregion
 
