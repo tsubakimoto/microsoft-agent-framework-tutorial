@@ -2,5 +2,6 @@
   <Folder Name="/src/">
     <Project Path="src/MafConsoleApp/MafConsoleApp.csproj" Id="228344e3-e8ba-445f-9b03-77e7b567dfd7" />
     <Project Path="src/MafFunctionApp/MafFunctionApp.csproj" Id="47b19a90-4416-4fc2-a803-37827625efef" />
+    <Project Path="src/MafHostedAgentApp/MafHostedAgentApp.csproj" Id="c3c6fdbc-ca93-4903-8716-dd52411d9fb7" />
   </Folder>
 </Solution>
