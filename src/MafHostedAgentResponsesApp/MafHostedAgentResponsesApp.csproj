@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>f57deac3-fa8e-4f9a-b3a5-1456736440bd</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.AI.AgentServer.Invocations" Version="1.0.0-beta.4" />
+    <PackageReference Include="Azure.AI.Projects" Version="2.1.0-beta.3" />
+    <PackageReference Include="DotNetEnv" Version="3.1.1" />
+    <!-- <PackageReference Include="Microsoft.Agents.AI.Foundry.Hosting" Version="1.10.0-preview.260610.1" /> -->
+    <PackageReference Include="Microsoft.Agents.AI.Foundry.Hosting" Version="1.6.1-preview.260514.1" />
+  </ItemGroup>
+
+</Project>
