@@ -1,6 +1,3 @@
----
-applyTo: '**/*'
----
 # Copilot Instructions
 
 ## Model tone
