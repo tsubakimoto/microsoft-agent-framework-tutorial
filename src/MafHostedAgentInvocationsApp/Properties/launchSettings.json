@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "MafHostedAgentInvocationsApp": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:58367;http://localhost:58368"
+    }
+  }
+}
