@@ -5,5 +5,6 @@
     <Project Path="src/MafHostedAgentApp/MafHostedAgentApp.csproj" Id="c3c6fdbc-ca93-4903-8716-dd52411d9fb7" />
     <Project Path="src/MafHostedAgentCallerApp/MafHostedAgentCallerApp.csproj" Id="68e9645b-0349-4a8c-ae90-ec72d2d26d93" />
     <Project Path="src/MafHostedAgentInvocationsApp/MafHostedAgentInvocationsApp.csproj" Id="e5ce203c-e2de-4912-8b99-6a790072073c" />
+    <Project Path="src/MafHostedAgentResponsesApp/MafHostedAgentResponsesApp.csproj" Id="58bd29b7-3faa-4420-beb9-bb3b811b7b24" />
   </Folder>
 </Solution>
