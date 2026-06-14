@@ -1,5 +1,5 @@
 ﻿// https://learn.microsoft.com/ja-jp/agent-framework/hosting/foundry-hosted-agent?pivots=programming-language-csharp
-// https://github.com/microsoft-foundry/foundry-samples/tree/main/samples/csharp/hosted-agents/agent-framework/simple-agent
+// https://github.com/microsoft-foundry/foundry-samples/tree/main/samples/csharp/hosted-agents/agent-framework/invocations-echo-agent
 using Azure.AI.AgentServer.Invocations;
 using Azure.AI.Projects;
 using Azure.Identity;
@@ -7,7 +7,6 @@ using Azure.Identity;
 using DotNetEnv;
 
 using Microsoft.Agents.AI;
-using Microsoft.Extensions.DependencyInjection;
 
 Env.TraversePath().Load();
 
