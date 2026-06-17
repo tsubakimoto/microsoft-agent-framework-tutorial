@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.AI.Projects" Version="2.1.0-beta.3" />
-    <PackageReference Include="DotNetEnv" Version="3.1.1" />
+    <PackageReference Include="DotNetEnv" Version="3.2.0" />
     <!-- <PackageReference Include="Microsoft.Agents.AI.Foundry.Hosting" Version="1.10.0-preview.260610.1" /> -->
     <PackageReference Include="Microsoft.Agents.AI.Foundry.Hosting" Version="1.6.1-preview.260514.1" />
   </ItemGroup>
