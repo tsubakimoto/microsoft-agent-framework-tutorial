@@ -21,124 +21,47 @@ var deploymentName = configuration["AZURE_OPENAI_DEPLOYMENT_NAME"] ?? "gpt-4o-mi
 
 var aiProjectClient = new AIProjectClient(new Uri(endpoint), new DefaultAzureCredential());
 
+await SimpleAgentExample(aiProjectClient, deploymentName);
+await ToolsAgentExample(aiProjectClient, deploymentName);
+await MultiTurnAgentExample(aiProjectClient, deploymentName);
+await MemoryAgentExample(aiProjectClient, deploymentName, endpoint);
+await WorkflowExample();
+
+
+
 #region Simple
 
-// https://learn.microsoft.com/ja-jp/agent-framework/get-started/your-first-agent
-Console.WriteLine("*** Simple ***");
-AIAgent agent1 = aiProjectClient
-    .AsAIAgent(
-        model: deploymentName,
-        instructions: "You are a friendly assistant. Keep your answers brief.",
-        name: "HelloAgent");
-
-Console.WriteLine(await agent1.RunAsync("What is the largest city in France?"));
-Console.WriteLine();
-
-#endregion
-
-#region Tools
-
-// https://learn.microsoft.com/ja-jp/agent-framework/get-started/add-tools
-Console.WriteLine("*** Tools ***");
-AIAgent agent2 = aiProjectClient
-    .AsAIAgent(
-        model: deploymentName,
-        instructions: "You are a helpful assistant.",
-        tools: [AIFunctionFactory.Create(GetWeather)]);
-
-Console.WriteLine(await agent2.RunAsync("What is the weather like in Amsterdam?"));
-Console.WriteLine();
-
-#endregion
-
-#region Multi-turn
-
-// https://learn.microsoft.com/ja-jp/agent-framework/get-started/multi-turn
-Console.WriteLine("*** Multi-turn conversation ***");
-AIAgent agent3 = aiProjectClient
-    .AsAIAgent(
-        model: deploymentName,
-        instructions: "You are a friendly assistant. Keep your answers brief.",
-        name: "ConversationAgent");
-
-AgentSession session3 = await agent3.CreateSessionAsync();
-Console.WriteLine(await agent3.RunAsync("My name is Alice and I love hiking.", session3));
-Console.WriteLine(await agent3.RunAsync("What do you remember about me?", session3));
-Console.WriteLine();
-
-#endregion
-
-#region Memory
-
-// https://learn.microsoft.com/ja-jp/agent-framework/get-started/memory
-// https://learn.microsoft.com/en-us/agent-framework/integrations/chat-history-memory-provider
-Console.WriteLine("*** Memory ***");
-VectorStore vectorStore = new InMemoryVectorStore(new InMemoryVectorStoreOptions()
+static async Task SimpleAgentExample(AIProjectClient aiProjectClient, string deploymentName)
 {
-    EmbeddingGenerator = new AzureOpenAIClient(new Uri(endpoint), new DefaultAzureCredential())
-        .GetEmbeddingClient("text-embedding-3-large")
-        .AsIEmbeddingGenerator()
-});
-AIAgent agent4 = aiProjectClient
-    .AsAIAgent(options: new ChatClientAgentOptions
-    {
-        Name = "MemoryAgent",
-        ChatOptions = new ChatOptions
-        {
-            ModelId = deploymentName,
-            Instructions = "You are a helpful assistant.",
-        },
-        AIContextProviders = [new ChatHistoryMemoryProvider(
-            vectorStore,
-            collectionName: "ChatHistory",
-            vectorDimensions: 3072,
-            session => new ChatHistoryMemoryProvider.State(
-                storageScope: new() { UserId = "user-123", SessionId = Guid.NewGuid().ToString() },
-                searchScope: new() { UserId = "user-123" }))]
-    });
+    // https://learn.microsoft.com/ja-jp/agent-framework/get-started/your-first-agent
+    Console.WriteLine("*** Simple ***");
+    AIAgent agent1 = aiProjectClient
+        .AsAIAgent(
+            model: deploymentName,
+            instructions: "You are a friendly assistant. Keep your answers brief.",
+            name: "HelloAgent");
 
-// Start a session and interact with the agent
-AgentSession session4_1 = await agent4.CreateSessionAsync();
-Console.WriteLine(await agent4.RunAsync("I prefer window seats on flights.", session4_1));
-
-// Start a new session - the agent can recall the user's preference
-AgentSession session4_2 = await agent4.CreateSessionAsync();
-Console.WriteLine(await agent4.RunAsync("Book me a flight to Seattle.", session4_2));
-
-Console.WriteLine();
-
-#endregion
-
-#region Workflows
-
-// https://learn.microsoft.com/ja-jp/agent-framework/get-started/workflows
-Console.WriteLine("*** Workflows ***");
-
-// Step 1: Convert text to uppercase
-Func<string, string> uppercaseFunc = s => s.ToUpperInvariant();
-var uppercase = uppercaseFunc.BindAsExecutor("UppercaseExecutor");
-
-// Step 2: Reverse the string and yield output
-ReverseTextExecutor reverse = new();
-
-// Step3: Build the workflow
-WorkflowBuilder builder = new(uppercase);
-builder.AddEdge(uppercase, reverse).WithOutputFrom(reverse);
-var workflow = builder.Build();
-
-await using Run run = await InProcessExecution.RunAsync(workflow, "Hello, World!");
-foreach (WorkflowEvent evt in run.NewEvents)
-{
-    if (evt is ExecutorCompletedEvent executorComplete)
-    {
-        Console.WriteLine($"{executorComplete.ExecutorId}: {executorComplete.Data}");
-    }
+    Console.WriteLine(await agent1.RunAsync("What is the largest city in France?"));
+    Console.WriteLine();
 }
-Console.WriteLine();
 
 #endregion
 
 #region Tools
+
+static async Task ToolsAgentExample(AIProjectClient aiProjectClient, string deploymentName)
+{
+    // https://learn.microsoft.com/ja-jp/agent-framework/get-started/add-tools
+    Console.WriteLine("*** Tools ***");
+    AIAgent agent2 = aiProjectClient
+        .AsAIAgent(
+            model: deploymentName,
+            instructions: "You are a helpful assistant.",
+            tools: [AIFunctionFactory.Create(GetWeather)]);
+
+    Console.WriteLine(await agent2.RunAsync("What is the weather like in Amsterdam?"));
+    Console.WriteLine();
+}
 
 [Description("Get the weather for a given location.")]
 static string GetWeather([Description("The location to get the weather for.")] string location)
@@ -146,7 +69,99 @@ static string GetWeather([Description("The location to get the weather for.")] s
 
 #endregion
 
+#region Multi-turn
+
+static async Task MultiTurnAgentExample(AIProjectClient aiProjectClient, string deploymentName)
+{
+    // https://learn.microsoft.com/ja-jp/agent-framework/get-started/multi-turn
+    Console.WriteLine("*** Multi-turn conversation ***");
+    AIAgent agent3 = aiProjectClient
+        .AsAIAgent(
+            model: deploymentName,
+            instructions: "You are a friendly assistant. Keep your answers brief.",
+            name: "ConversationAgent");
+
+    AgentSession session3 = await agent3.CreateSessionAsync();
+    Console.WriteLine(await agent3.RunAsync("My name is Alice and I love hiking.", session3));
+    Console.WriteLine(await agent3.RunAsync("What do you remember about me?", session3));
+    Console.WriteLine();
+}
+
+#endregion
+
+#region Memory
+
+static async Task MemoryAgentExample(AIProjectClient aiProjectClient, string deploymentName, string endpoint)
+{
+    // https://learn.microsoft.com/ja-jp/agent-framework/get-started/memory
+    // https://learn.microsoft.com/en-us/agent-framework/integrations/chat-history-memory-provider
+    Console.WriteLine("*** Memory ***");
+    VectorStore vectorStore = new InMemoryVectorStore(new InMemoryVectorStoreOptions()
+    {
+        EmbeddingGenerator = new AzureOpenAIClient(new Uri(endpoint), new DefaultAzureCredential())
+            .GetEmbeddingClient("text-embedding-3-large")
+            .AsIEmbeddingGenerator()
+    });
+    AIAgent agent4 = aiProjectClient
+        .AsAIAgent(options: new ChatClientAgentOptions
+        {
+            Name = "MemoryAgent",
+            ChatOptions = new ChatOptions
+            {
+                ModelId = deploymentName,
+                Instructions = "You are a helpful assistant.",
+            },
+            AIContextProviders = [new ChatHistoryMemoryProvider(
+            vectorStore,
+            collectionName: "ChatHistory",
+            vectorDimensions: 3072,
+            session => new ChatHistoryMemoryProvider.State(
+                storageScope: new() { UserId = "user-123", SessionId = Guid.NewGuid().ToString() },
+                searchScope: new() { UserId = "user-123" }))]
+        });
+
+    // Start a session and interact with the agent
+    AgentSession session4_1 = await agent4.CreateSessionAsync();
+    Console.WriteLine(await agent4.RunAsync("I prefer window seats on flights.", session4_1));
+
+    // Start a new session - the agent can recall the user's preference
+    AgentSession session4_2 = await agent4.CreateSessionAsync();
+    Console.WriteLine(await agent4.RunAsync("Book me a flight to Seattle.", session4_2));
+
+    Console.WriteLine();
+}
+
+#endregion
+
 #region Workflows
+
+static async Task WorkflowExample()
+{
+    // https://learn.microsoft.com/ja-jp/agent-framework/get-started/workflows
+    Console.WriteLine("*** Workflows ***");
+
+    // Step 1: Convert text to uppercase
+    Func<string, string> uppercaseFunc = s => s.ToUpperInvariant();
+    var uppercase = uppercaseFunc.BindAsExecutor("UppercaseExecutor");
+
+    // Step 2: Reverse the string and yield output
+    ReverseTextExecutor reverse = new();
+
+    // Step3: Build the workflow
+    WorkflowBuilder builder = new(uppercase);
+    builder.AddEdge(uppercase, reverse).WithOutputFrom(reverse);
+    var workflow = builder.Build();
+
+    await using Run run = await InProcessExecution.RunAsync(workflow, "Hello, World!");
+    foreach (WorkflowEvent evt in run.NewEvents)
+    {
+        if (evt is ExecutorCompletedEvent executorComplete)
+        {
+            Console.WriteLine($"{executorComplete.ExecutorId}: {executorComplete.Data}");
+        }
+    }
+    Console.WriteLine();
+}
 
 class ReverseTextExecutor() : Executor<string, string>("ReverseTextExecutor")
 {
