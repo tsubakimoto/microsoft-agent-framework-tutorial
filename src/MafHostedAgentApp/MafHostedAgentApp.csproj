@@ -12,6 +12,7 @@
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
     <!-- <PackageReference Include="Microsoft.Agents.AI.Foundry.Hosting" Version="1.10.0-preview.260610.1" /> -->
     <PackageReference Include="Microsoft.Agents.AI.Foundry.Hosting" Version="1.6.1-preview.260514.1" />
+    <PackageReference Include="ModelContextProtocol" Version="1.4.0" />
   </ItemGroup>
 
 </Project>
