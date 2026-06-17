@@ -11,6 +11,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.InMemory;
 
+using ModelContextProtocol.Client;
+
 var configuration = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .Build();
@@ -23,6 +25,7 @@ var aiProjectClient = new AIProjectClient(new Uri(endpoint), new DefaultAzureCre
 
 await SimpleAgentExample(aiProjectClient, deploymentName);
 await ToolsAgentExample(aiProjectClient, deploymentName);
+await RemoteMCPServerExample(aiProjectClient, deploymentName);
 await MultiTurnAgentExample(aiProjectClient, deploymentName);
 await MemoryAgentExample(aiProjectClient, deploymentName, endpoint);
 await WorkflowExample();
@@ -66,6 +69,42 @@ static async Task ToolsAgentExample(AIProjectClient aiProjectClient, string depl
 [Description("Get the weather for a given location.")]
 static string GetWeather([Description("The location to get the weather for.")] string location)
     => $"The weather in {location} is cloudy with a high of 15°C.";
+
+#endregion
+
+#region MCP Server
+
+static async Task RemoteMCPServerExample(AIProjectClient aiProjectClient, string deploymentName)
+{
+    // https://learn.microsoft.com/ja-jp/agent-framework/agents/tools/hosted-mcp-tools?pivots=programming-language-csharp
+    // https://learn.microsoft.com/ja-jp/azure/foundry/agents/how-to/tools/model-context-protocol?tabs=hosted-agents&pivots=csharp
+    // https://github.com/modelcontextprotocol/csharp-sdk/blob/main/samples/QuickstartClient/Program.cs
+    Console.WriteLine("*** Remote MCP Server ***");
+
+    IClientTransport clientTransport = new HttpClientTransport(new()
+    {
+        Endpoint = new Uri("https://learn.microsoft.com/api/mcp"),
+        Name = "Microsoft Learn MCP Server"
+    });
+    await using var mcpClient = await McpClient.CreateAsync(clientTransport);
+
+    var mcpTools = await mcpClient.ListToolsAsync();
+    List<AITool> agentTools = [.. mcpTools.Cast<AITool>()];
+    foreach (var tool in mcpTools)
+    {
+        Console.WriteLine($"Connected to server with tools: {tool.Name}");
+    }
+
+    AIAgent agent = aiProjectClient
+        .AsAIAgent(
+            model: deploymentName,
+            instructions: "You answer questions by searching the Microsoft Learn content only.",
+            name: "MicrosoftLearnAgent",
+            tools: agentTools);
+
+    // You can then invoke the agent like any other AIAgent.
+    Console.WriteLine(await agent.RunAsync("Please summarize the Azure AI Agent documentation related to MCP Tool calling?"));
+}
 
 #endregion
 
