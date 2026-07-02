@@ -1,16 +1,12 @@
 # Before running the sample:
 #    pip install azure-ai-projects>=2.1.0
-#    python main.py <endpoint>
-import sys
 
 from azure.identity import DefaultAzureCredential
 from azure.ai.projects import AIProjectClient
 from azure.ai.projects.models import VersionRefIndicator
 
-args = sys.argv
-
-endpoint = args[1]
-agent_name = "maf-hosted-agent-responses-app"
+endpoint = "https://{xxx}.services.ai.azure.com/api/projects/{yyy}"
+agent_name = "{zzz}"
 agent_version = "1"
 isolation_key = "my-isolation-key"
 
@@ -31,7 +27,7 @@ with (
     # Create a session for conversation state (preview feature)
     session = project_client.beta.agents.create_session(
         agent_name=agent_name,
-        # isolation_key=isolation_key, # **not working**
+        # isolation_key=isolation_key,
         version_indicator=VersionRefIndicator(agent_version=agent_version),
     )
     print(f"Created session: {session.agent_session_id}")
@@ -53,5 +49,5 @@ with (
         project_client.beta.agents.delete_session(
             agent_name=agent_name,
             session_id=session.agent_session_id,
-            # isolation_key=isolation_key, # **not working**
+            # isolation_key=isolation_key,
         )
