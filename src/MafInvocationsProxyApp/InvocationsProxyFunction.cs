@@ -22,8 +22,9 @@ public class InvocationsProxyFunction(
     private readonly HttpClient _httpClient = httpClientFactory.CreateClient("foundry");
 
     private readonly string _foundryEndpoint =
-        configuration["FOUNDRY_INVOCATIONS_ENDPOINT"]
-        ?? throw new InvalidOperationException("FOUNDRY_INVOCATIONS_ENDPOINT is not set.");
+        string.IsNullOrWhiteSpace(configuration["FOUNDRY_INVOCATIONS_ENDPOINT"])
+            ? throw new InvalidOperationException("FOUNDRY_INVOCATIONS_ENDPOINT is not set.")
+            : configuration["FOUNDRY_INVOCATIONS_ENDPOINT"]!;
 
     [Function(nameof(InvocationsProxyFunction))]
     public async Task<HttpResponseData> RunAsync(
