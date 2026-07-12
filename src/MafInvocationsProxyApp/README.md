@@ -56,9 +56,11 @@ https://ai-account-xxxx.services.ai.azure.com/api/projects/<project>/agents/<age
 ### Steps
 
 ```bash
+# 0. Move to the app directory (where azure.yaml lives)
+cd src/MafInvocationsProxyApp
+
 # 1. Initialize the environment (first time only)
 azd init
-
 # 2. Set required environment variables
 azd env set AZURE_AI_ACCOUNT_NAME  <ai-services-resource-name>
 azd env set AZURE_AI_RESOURCE_GROUP <resource-group-of-ai-services>
