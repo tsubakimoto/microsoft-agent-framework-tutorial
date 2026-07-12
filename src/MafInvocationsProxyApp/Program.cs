@@ -9,6 +9,9 @@ builder.ConfigureFunctionsWebApplication();
 
 builder.Services
     .AddSingleton<DefaultAzureCredential>()
-    .AddHttpClient("foundry");
+    .AddHttpClient("foundry", client =>
+    {
+        client.Timeout = Timeout.InfiniteTimeSpan;
+    });
 
 builder.Build().Run();
