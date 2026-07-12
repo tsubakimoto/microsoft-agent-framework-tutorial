@@ -46,7 +46,46 @@ https://ai-account-xxxx.services.ai.azure.com/api/projects/<project>/agents/<age
 2. Sign in with Azure CLI (`az login`) — `DefaultAzureCredential` uses your CLI credentials locally.
 3. Run with `func start` or F5 in Visual Studio.
 
-## Deployment
+## Deploy with Azure Developer CLI (azd)
+
+### Prerequisites
+
+- [Azure Developer CLI](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd)
+- An existing Foundry AI Services resource and its resource group
+
+### Steps
+
+```bash
+# 1. Initialize the environment (first time only)
+azd init
+
+# 2. Set required environment variables
+azd env set AZURE_AI_ACCOUNT_NAME  <ai-services-resource-name>
+azd env set AZURE_AI_RESOURCE_GROUP <resource-group-of-ai-services>
+
+# 3. Set the Foundry invocations endpoint URL
+azd env set FOUNDRY_INVOCATIONS_ENDPOINT \
+  "https://<account>.services.ai.azure.com/api/projects/<project>/agents/<agent>/endpoint/protocols/invocations?api-version=v1"
+
+# 4. Deploy (provision infrastructure + deploy function code)
+azd up
+```
+
+`azd up` will:
+1. Create a resource group, Storage Account, App Service Plan (Consumption), and Function App
+2. Assign `Azure AI Developer` role on the specified AI Services resource to the Function App's managed identity
+3. Build and zip-deploy the function code
+
+### Get the function key after deployment
+
+```bash
+az functionapp keys list \
+  --name $(azd env get-value AZURE_FUNCTION_APP_NAME) \
+  --resource-group $(azd env get-value AZURE_RESOURCE_GROUP) \
+  --query functionKeys -o json
+```
+
+## Manual deployment
 
 Deploy to Azure Functions (Consumption or any plan). Assign the Function App's **system-assigned managed identity** the **Azure AI Developer** role (`64702f94-c441-49e6-a78b-ef80e0188fee`) on the Foundry AI Services resource.
 

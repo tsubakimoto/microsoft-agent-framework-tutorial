@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: maf-invocations-proxy
+services:
+    maf-invocations-proxy:
+        project: .
+        host: function
+        language: csharp
+infra:
+    provider: bicep
+    path: ./infra
