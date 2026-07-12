@@ -18,8 +18,9 @@ param aiServicesAccountName string
 @description('Resource group containing the existing AI Services resource')
 param aiServicesResourceGroupName string
 
+@minLength(1)
 @description('Full Foundry invocations endpoint URL (including ?api-version=v1). Set via: azd env set FOUNDRY_INVOCATIONS_ENDPOINT <url>')
-param foundryInvocationsEndpoint string = ''
+param foundryInvocationsEndpoint string
 
 var tags = { 'azd-env-name': environmentName }
 var resourceToken = toLower(uniqueString(subscription().id, resourceGroupName, location))
