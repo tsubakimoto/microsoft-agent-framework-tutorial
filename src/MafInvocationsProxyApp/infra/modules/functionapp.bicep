@@ -20,6 +20,9 @@ resource plan 'Microsoft.Web/serverfarms@2023-01-01' = {
     name: 'Y1'
     tier: 'Dynamic'
   }
+  properties: {
+    reserved: true // required for Linux
+  }
 }
 
 resource app 'Microsoft.Web/sites@2023-01-01' = {
@@ -27,7 +30,7 @@ resource app 'Microsoft.Web/sites@2023-01-01' = {
   location: location
   // 'azd-service-name' must match the service key in azure.yaml
   tags: union(tags, { 'azd-service-name': 'maf-invocations-proxy' })
-  kind: 'functionapp'
+  kind: 'functionapp,linux'
   identity: {
     type: 'SystemAssigned'
   }
@@ -37,13 +40,12 @@ resource app 'Microsoft.Web/sites@2023-01-01' = {
     siteConfig: {
       appSettings: [
         { name: 'AzureWebJobsStorage', value: storageConnectionString }
-        { name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING', value: storageConnectionString }
-        { name: 'WEBSITE_CONTENTSHARE', value: toLower(appName) }
         { name: 'FUNCTIONS_EXTENSION_VERSION', value: '~4' }
         { name: 'FUNCTIONS_WORKER_RUNTIME', value: 'dotnet-isolated' }
         { name: 'WEBSITE_RUN_FROM_PACKAGE', value: '1' }
         { name: 'FOUNDRY_INVOCATIONS_ENDPOINT', value: foundryInvocationsEndpoint }
       ]
+      linuxFxVersion: 'DOTNET-ISOLATED|10.0'
       ftpsState: 'Disabled'
       minTlsVersion: '1.2'
     }
